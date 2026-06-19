@@ -8,26 +8,41 @@ export default function Navbar() {
   const [role, setRole] = useState("");
 
   useEffect(() => {
+  loadRole();
+
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange(() => {
     loadRole();
-  }, []);
+  });
+
+  return () => {
+    subscription.unsubscribe();
+  };
+}, []);
 
   async function loadRole() {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-    if (!user) return;
+  console.log("USER", user);
 
-    const { data } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
+  if (!user) return;
 
-    if (data) {
-      setRole(data.role);
-    }
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  console.log("ROLE DATA", data);
+  console.log("ROLE ERROR", error);
+
+  if (data) {
+    setRole(data.role);
   }
+}
 
   async function logout() {
     await supabase.auth.signOut();
