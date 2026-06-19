@@ -11,57 +11,53 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-async function generateViralScore(parsed: any) {
-  try {
-    const scoreResponse = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content: `
-You are a viral content evaluator.
+function generateViralScore(parsed: any) {
+  let score = 40;
 
-Score content from 0-100.
+  const ideas = parsed?.ideas || [];
+  const hooks = parsed?.hooks || [];
+  const hashtags = parsed?.hashtags || [];
+  const caption = parsed?.caption || "";
 
-95-100 = Extremely viral
-85-94 = Strong viral potential
-70-84 = Good
-50-69 = Average
-30-49 = Weak
-0-29 = Poor
+  // Hook strength
+  hooks.forEach((hook: string) => {
+    if (
+      hook.includes("Nobody") ||
+      hook.includes("POV") ||
+      hook.includes("Stop") ||
+      hook.includes("Don't") ||
+      hook.includes("?")
+    ) {
+      score += 4;
+    }
+  });
 
-Most content should fall between 60 and 85.
-Only exceptional content should receive 90+.
+  // Idea quality
+  score += Math.min(15, ideas.length * 2);
 
-Return ONLY JSON:
+  // Caption quality
+  if (caption.length > 150) score += 10;
+  else if (caption.length > 80) score += 7;
+  else if (caption.length > 40) score += 4;
 
-{
-  "viral_score": 78
+  // Hashtag quality
+  score += Math.min(10, hashtags.length);
+
+  // Variety bonus
+  const uniqueWords = new Set(
+    JSON.stringify(parsed)
+      .toLowerCase()
+      .split(/\W+/)
+      .filter(Boolean)
+  );
+
+  score += Math.min(15, uniqueWords.size / 8);
+
+  // Random variance
+  score += Math.floor(Math.random() * 21) - 10;
+
+  return Math.max(25, Math.min(100, Math.round(score)));
 }
-`,
-        },
-        {
-          role: "user",
-          content: JSON.stringify(parsed),
-        },
-      ],
-      temperature: 0.3,
-    });
-
-    const raw =
-      scoreResponse.choices[0].message.content || "{}";
-
-    const scoreData = JSON.parse(raw);
-
-    return Math.max(
-      0,
-      Math.min(100, Number(scoreData.viral_score) || 50)
-    );
-  } catch {
-    return 50;
-  }
-}
-
 export async function POST(req: Request) {
   try {
     const { platform, topic, niche, user_id } = await req.json();
