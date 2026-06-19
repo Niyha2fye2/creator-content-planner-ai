@@ -11,47 +11,55 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// 🔥 improved viral scoring (more realistic distribution)
-function generateViralScore(parsed: any) {
-  let score = 35; // lower base to allow real spread
+async function generateViralScore(parsed: any) {
+  try {
+    const scoreResponse = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: `
+You are a viral content evaluator.
 
-  // ideas (soft scaling instead of guaranteed points)
-  const ideas = parsed?.ideas?.length || 0;
-  score += Math.min(18, ideas * 3.2);
+Score content from 0-100.
 
-  // hooks (highest weight, but not linear maxing)
-  const hooks = parsed?.hooks?.length || 0;
-  score += Math.min(25, hooks * 3.8);
+95-100 = Extremely viral
+85-94 = Strong viral potential
+70-84 = Good
+50-69 = Average
+30-49 = Weak
+0-29 = Poor
 
-  // hashtags (diminishing returns)
-  const tags = parsed?.hashtags?.length || 0;
-  score += Math.min(12, tags * 1.2);
+Most content should fall between 60 and 85.
+Only exceptional content should receive 90+.
 
-  // caption quality (now more strict + realistic)
-  const captionLength = parsed?.caption?.length || 0;
+Return ONLY JSON:
 
-  if (captionLength >= 80 && captionLength <= 160) {
-    score += 18;
-  } else if (captionLength >= 40) {
-    score += 10;
-  } else if (captionLength >= 20) {
-    score += 5;
-  } else {
-    score -= 5;
+{
+  "viral_score": 78
+}
+`,
+        },
+        {
+          role: "user",
+          content: JSON.stringify(parsed),
+        },
+      ],
+      temperature: 0.3,
+    });
+
+    const raw =
+      scoreResponse.choices[0].message.content || "{}";
+
+    const scoreData = JSON.parse(raw);
+
+    return Math.max(
+      0,
+      Math.min(100, Number(scoreData.viral_score) || 50)
+    );
+  } catch {
+    return 50;
   }
-
-  // 🔥 realism penalty (prevents everything hitting max)
-  const imbalance =
-    Math.abs(ideas - 5) +
-    Math.abs(hooks - 5) +
-    Math.abs(tags - 10);
-
-  score -= Math.min(10, imbalance * 1.2);
-
-  // small controlled variance (not too random)
-  score += Math.floor(Math.random() * 6); // 0–5 only
-
-  return Math.max(0, Math.min(100, Math.round(score)));
 }
 
 export async function POST(req: Request) {
@@ -102,7 +110,7 @@ Niche: ${niche}
       );
     }
 
-    const viral_score = generateViralScore(parsed);
+    const viral_score = await generateViralScore(parsed);
 
     const { error } = await supabase.from("ai_generations").insert({
       user_id,
