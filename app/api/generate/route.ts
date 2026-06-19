@@ -12,38 +12,36 @@ const supabase = createClient(
 );
 
 function generateViralScore(parsed: any) {
-  let score = 40;
+  let score = 0;
 
   const ideas = parsed?.ideas || [];
   const hooks = parsed?.hooks || [];
   const hashtags = parsed?.hashtags || [];
   const caption = parsed?.caption || "";
 
-  // Hook strength
+  // Base randomness (biggest factor)
+  score += Math.floor(Math.random() * 51) + 30; // 30-80
+
+  // Strong hook bonuses
   hooks.forEach((hook: string) => {
-    if (
-      hook.includes("Nobody") ||
-      hook.includes("POV") ||
-      hook.includes("Stop") ||
-      hook.includes("Don't") ||
-      hook.includes("?")
-    ) {
-      score += 4;
-    }
+    const h = hook.toLowerCase();
+
+    if (h.includes("pov")) score += 4;
+    if (h.includes("nobody")) score += 4;
+    if (h.includes("stop")) score += 4;
+    if (h.includes("don't")) score += 4;
+    if (h.includes("?")) score += 3;
+    if (h.includes("secret")) score += 5;
+    if (h.includes("viral")) score += 5;
   });
 
-  // Idea quality
-  score += Math.min(15, ideas.length * 2);
-
   // Caption quality
-  if (caption.length > 150) score += 10;
-  else if (caption.length > 80) score += 7;
-  else if (caption.length > 40) score += 4;
+  if (caption.length > 200) score += 10;
+  else if (caption.length > 120) score += 6;
+  else if (caption.length > 60) score += 3;
+  else score -= 5;
 
-  // Hashtag quality
-  score += Math.min(10, hashtags.length);
-
-  // Variety bonus
+  // Variety score
   const uniqueWords = new Set(
     JSON.stringify(parsed)
       .toLowerCase()
@@ -51,13 +49,17 @@ function generateViralScore(parsed: any) {
       .filter(Boolean)
   );
 
-  score += Math.min(15, uniqueWords.size / 8);
+  score += Math.min(10, uniqueWords.size / 10);
 
-  // Random variance
-  score += Math.floor(Math.random() * 21) - 10;
+  // Small idea bonus
+  score += Math.min(5, ideas.length);
 
-  return Math.max(25, Math.min(100, Math.round(score)));
+  // Small hashtag bonus
+  score += Math.min(5, hashtags.length / 2);
+
+  return Math.max(20, Math.min(100, Math.round(score)));
 }
+
 export async function POST(req: Request) {
   try {
     const { platform, topic, niche, user_id } = await req.json();
@@ -106,7 +108,7 @@ Niche: ${niche}
       );
     }
 
-    const viral_score = await generateViralScore(parsed);
+    const viral_score = generateViralScore(parsed);
 
     const { error } = await supabase.from("ai_generations").insert({
       user_id,
