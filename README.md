@@ -29,7 +29,8 @@
 ### CreatorFlow includes three user roles:
 
 ### Viewer
-
+* Email: viewer.test@creatorflow.com
+* Password: Creator123!
 ### Permissions:
 
 -  View content ideas
@@ -39,6 +40,8 @@
 -  Cannot access Admin panel
 
 ### Editor
+* Email: editor.test@creatorflow.com
+* Password: Creator123!
 
 ### Permissions:
 
@@ -48,22 +51,14 @@
 - Update content status
 
 ### Admin
-
+* Email: admin.test@creatorflow.com
+* Password: Creator123!
 ### Permissions:
 
 - Full system access
 - Access Admin panel
 - Manage user roles
 - View all users
-
-### How to Test Roles
-
-1. Create a new account using the Sign Up page.
-2. Log in using an Admin account.
-3. Navigate to the Admin Panel.
-4. Locate the user you would like to modify.
-5. Change the user’s role using the role dropdown (viewer, editor, or admin).
-6. Log out and log back in using that account to test the selected permissions.
 
 Admin accounts can verify that:
 
