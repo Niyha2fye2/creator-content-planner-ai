@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useEffect } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -13,35 +14,29 @@ export default function LoginPage() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
+  
+
   async function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
+  e.preventDefault();
 
-    setLoading(true);
-    setMessage("");
+  setLoading(true);
+  setMessage("");
 
-    const { data, error } =
-  await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+  const { error } =
+    await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-console.log("LOGIN DATA:", data);
-console.log("LOGIN ERROR:", error);
-
-if (error) {
+  if (error) {
   setMessage(error.message);
   setLoading(false);
   return;
 }
 
-console.log("REDIRECTING NOW");
+window.location.href = "/dashboard";
+}
 
-setTimeout(() => {
-  window.location.assign("/dashboard");
-}, 1000);
-
-    
-  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-200 via-pink-100 to-pink-50 p-6">
