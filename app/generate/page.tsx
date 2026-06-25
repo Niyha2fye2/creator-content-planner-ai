@@ -61,16 +61,22 @@ if (role === "viewer") {
       return;
     }
 
-    const response = await fetch("/api/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        platform,
-        topic,
-        niche,
-        user_id: user.id,
-      }),
-    });
+    const {
+  data: { session },
+} = await supabase.auth.getSession();
+
+const response = await fetch("/api/generate", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${session?.access_token}`,
+  },
+  body: JSON.stringify({
+    platform,
+    topic,
+    niche,
+  }),
+});
 
     const data = await response.json();
 

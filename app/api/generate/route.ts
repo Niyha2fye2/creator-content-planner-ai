@@ -62,11 +62,45 @@ function generateViralScore(parsed: any) {
 
 export async function POST(req: Request) {
   try {
-    const { platform, topic, niche, user_id } = await req.json();
+    const authHeader = req.headers.get("authorization");
 
-    if (!user_id) {
-      return NextResponse.json({ error: "No user_id" }, { status: 400 });
-    }
+if (!authHeader) {
+  return NextResponse.json(
+    { error: "Unauthorized" },
+    { status: 401 }
+  );
+}
+
+const token = authHeader.replace("Bearer ", "");
+
+const authSupabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    global: {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  }
+);
+
+const {
+  data: { user },
+  error: userError,
+} = await authSupabase.auth.getUser();
+
+if (userError || !user) {
+  return NextResponse.json(
+    { error: "Unauthorized" },
+    { status: 401 }
+  );
+}
+
+const user_id = user.id;
+
+// Get request body
+const { platform, topic, niche } = await req.json();
 
     const systemPrompt = `
 You are a professional social media strategist.
