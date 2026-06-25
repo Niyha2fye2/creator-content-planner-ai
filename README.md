@@ -85,3 +85,18 @@ OPENAI_API_KEY=your_openai_api_key
 - Supabase
 - OpenAI
 - Vercel
+
+## Security
+Server-side route protection is implemented using Next.js middleware.
+API routes verify authenticated sessions before processing requests.
+Supabase Row Level Security (RLS) policies restrict users to accessing only their own data.
+Admin users can view all profiles and manage roles through additional RLS policies.
+## Manual Security Testing
+
+### The following scenarios were tested:
+
+- Unauthenticated users are redirected to the login page when attempting to access protected routes.
+- Viewer accounts cannot access the AI page or Admin panel.
+- Editor accounts can access AI generation but cannot access the Admin panel.
+- Admin accounts can access all application features and manage user roles.
+- Users cannot view or modify other users' content, calendar items, or AI history.
