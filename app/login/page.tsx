@@ -34,6 +34,7 @@ export default function LoginPage() {
   return;
 }
 
+document.cookie = "creatorflow-auth=true; path=/";
 window.location.href = "/dashboard";
 }
 
@@ -45,7 +46,7 @@ window.location.href = "/dashboard";
 
         <h1 className="text-3xl font-bold text-pink-600 text-center">
           Welcome Back 💕
-          
+
         </h1>
 
         <p className="text-center text-gray-500 mt-2 mb-6">

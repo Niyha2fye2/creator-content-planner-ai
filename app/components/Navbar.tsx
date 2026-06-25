@@ -45,8 +45,12 @@ export default function Navbar() {
 }
 
   async function logout() {
-    await supabase.auth.signOut();
-    window.location.href = "/login";
+   await supabase.auth.signOut();
+
+document.cookie =
+  "creatorflow-auth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+
+window.location.href = "/login";
   }
 
   return (
