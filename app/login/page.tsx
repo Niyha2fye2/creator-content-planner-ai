@@ -19,19 +19,22 @@ export default function LoginPage() {
     setLoading(true);
     setMessage("");
 
-    const { error } =
-      await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+    const { data, error } =
+  await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
-    if (error) {
-      setMessage(error.message);
-      setLoading(false);
-      return;
-    }
+if (error) {
+  setMessage(error.message);
+  setLoading(false);
+  return;
+}
 
-    router.push("/dashboard");
+alert("Login successful!");
+
+window.location.href = "/dashboard";
+    
   }
 
   return (
