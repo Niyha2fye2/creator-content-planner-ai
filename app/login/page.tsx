@@ -19,11 +19,14 @@ export default function LoginPage() {
     setLoading(true);
     setMessage("");
 
-    const { error } =
+    const { data, error } =
   await supabase.auth.signInWithPassword({
     email,
     password,
   });
+
+console.log("LOGIN DATA:", data);
+console.log("LOGIN ERROR:", error);
 
 if (error) {
   setMessage(error.message);
@@ -31,7 +34,11 @@ if (error) {
   return;
 }
 
-router.push("/dashboard");
+console.log("REDIRECTING NOW");
+
+setTimeout(() => {
+  window.location.assign("/dashboard");
+}, 1000);
 
     
   }

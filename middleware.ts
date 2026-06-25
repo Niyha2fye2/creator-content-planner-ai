@@ -1,24 +1,44 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
 
-export function middleware(request: NextRequest) {
-  // Allow public routes
-  const publicRoutes = ["/login", "/signup", "/forgot-password"];
+export async function middleware(request: NextRequest) {
+  let response = NextResponse.next({
+    request,
+  });
 
-  if (
-    publicRoutes.some((route) =>
-      request.nextUrl.pathname.startsWith(route)
-    )
-  ) {
-    return NextResponse.next();
-  }
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value;
+        },
 
-  // Check for ANY Supabase auth cookie
-  const hasSupabaseCookie = request.cookies
-    .getAll()
-    .some((cookie) => cookie.name.startsWith("sb-"));
+        set(name: string, value: string, options: any) {
+          response.cookies.set({
+            name,
+            value,
+            ...options,
+          });
+        },
 
-  // Protected routes
+        remove(name: string, options: any) {
+          response.cookies.set({
+            name,
+            value: "",
+            ...options,
+            maxAge: 0,
+          });
+        },
+      },
+    }
+  );
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   const protectedRoutes = [
     "/dashboard",
     "/admin",
@@ -33,11 +53,11 @@ export function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith(route)
   );
 
-  if (isProtected && !hasSupabaseCookie) {
+  if (isProtected && !user) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  return NextResponse.next();
+  return response;
 }
 
 export const config = {
@@ -49,8 +69,5 @@ export const config = {
     "/analytics/:path*",
     "/history/:path*",
     "/profile/:path*",
-    "/login",
-    "/signup",
-    "/forgot-password",
   ],
 };
