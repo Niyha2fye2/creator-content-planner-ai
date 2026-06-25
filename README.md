@@ -66,16 +66,16 @@ Admin accounts can verify that:
 - Editors can access AI generation but not the Admin panel.
 - Admins have full access to all application features.
 
-## local Setup
+## Local Setup
 ### Clone repository
 - git clone https://github.com/Niyha2fye2/creator-content-planner-ai.git
 ### Install dependencies
 - npm install
 ### Create a .env.local file with:
-- NEXT_PUBLIC_SUPABASE_URL=
-- NEXT_PUBLIC_SUPABASE_ANON_KEY=
-- SUPABASE_SERVICE_ROLE_KEY=
-- OPENAI_API_KEY=
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+OPENAI_API_KEY=your_openai_api_key
 ### Run development server
  - npm run dev
 - Open:
