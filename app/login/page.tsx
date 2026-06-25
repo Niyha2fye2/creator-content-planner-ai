@@ -19,7 +19,7 @@ export default function LoginPage() {
     setLoading(true);
     setMessage("");
 
-    const { data, error } =
+    const { error } =
   await supabase.auth.signInWithPassword({
     email,
     password,
@@ -31,9 +31,8 @@ if (error) {
   return;
 }
 
-alert("Login successful!");
+router.push("/dashboard");
 
-window.location.href = "/dashboard";
     
   }
 
