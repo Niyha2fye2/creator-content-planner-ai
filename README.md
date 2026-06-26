@@ -68,6 +68,7 @@ Admins have full access to the application and can:
 * Manage users and roles
 * View all users and content
 * Create, edit, and delete all content
+
 Cannot:
 * View users passwords
 * Access authentication credentials 
