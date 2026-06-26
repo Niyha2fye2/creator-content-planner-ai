@@ -23,7 +23,6 @@ CreatorFlow AI is an AI-powered content planning platform designed to help creat
 * TypeScript
 * Supabase
 * OpenAI API
-* Tailwind CSS
 * Vercel
 
 ---
